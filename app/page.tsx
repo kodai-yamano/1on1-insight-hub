@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { AlertCircle, ChevronDown, Sparkles } from 'lucide-react';
+import { AlertCircle, ChevronDown, LogOut, Sparkles } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
 
 import { InputForm } from '@/components/InputForm';
 import { OutputDashboard } from '@/components/OutputDashboard';
@@ -36,6 +37,7 @@ function validate(values: FormValues): string | null {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const { data: session } = useSession();
   const [formValues, setFormValues] = useState<FormValues>(INITIAL_FORM);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -142,6 +144,28 @@ export default function Home() {
             <br className="hidden sm:block" />
             1on1 分析・ネクストアクション自動生成プラットフォーム
           </p>
+
+          {/* User info + logout */}
+          {session?.user && (
+            <div className="mt-5 ml-12 flex items-center gap-3">
+              {session.user.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={session.user.image}
+                  alt={session.user.name ?? ''}
+                  className="w-7 h-7 rounded-full ring-2 ring-white/20"
+                />
+              )}
+              <span className="text-xs text-slate-300">{session.user.email}</span>
+              <button
+                onClick={() => signOut()}
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                ログアウト
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
