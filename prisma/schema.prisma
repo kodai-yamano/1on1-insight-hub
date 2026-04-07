@@ -11,10 +11,12 @@ datasource db {
 }
 
 model Member {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  records   Record[]
+  id           String   @id @default(cuid())
+  name         String
+  expectedRole String?
+  growthTheme  String?
+  createdAt    DateTime @default(now())
+  records      Record[]
 }
 
 model Record {

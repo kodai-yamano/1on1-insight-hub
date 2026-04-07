@@ -1,21 +1,27 @@
 # Objective
-現在の1on1分析アプリに、「1on1のサマリー（議題と決定事項）」を自動生成して表示する機能を追加する。
+1. AIの出力（サマリー、ポジティブな変化、ネクストアクション等）が、入力された「文字起こし」や「自己評価（Good/Motto）」を全く反映していない問題（ハルシネーション）を修正する。
+2. 「期待役割」と「成長テーマ」をメンバーごとにDB（Memberモデル）に保存し、次回選択時に自動入力されるようにする（途中変更も可能にする）。
 
 # Execution Steps (Cursor Composer)
 以下のステップで既存のコードを修正してください。
 
-1. [Type Update]
-   - `lib/types.ts` 内の `ViewAData` インターフェースに、以下のプロパティを追加する。
-     `summary: { topics: string[]; decisions: string[] };`
+1. [Schema Update]
+   - `schema.prisma` の `Member` モデルに `expectedRole` (String?) と `growthTheme` (String?) を追加する。
+   - ターミナルで `npx prisma db push` を実行し、DBスキーマを更新する。
 
-2. [Prompt Update]
-   - `lib/prompts.ts` のシステムプロンプト（JSON出力の指示部分）を修正し、入力された「1on1の文字起こしデータ」を元に、ViewAの `summary` として「主な議題（topics）」と「決定事項（decisions）」をそれぞれ箇条書きで抽出・生成するように指示を追加する。
+2. [API Update]
+   - メンバーの取得・作成・更新を行うAPIエンドポイント（例: `app/api/members/route.ts` や必要に応じて `PUT` メソッド）を修正し、`expectedRole` と `growthTheme` を扱えるようにする。
 
 3. [UI Update]
-   - `components/ViewA.tsx` を修正し、生成されたサマリー（議題と決定事項）を、画面の一番上（「今週のポジティブな変化」の上）にわかりやすく表示する。
-   - コピー機能（generateCopyText等）にもサマリーの内容が含まれるように文字列の生成ロジックを修正する。
+   - `components/InputForm.tsx` にて、メンバーを選択した際（プルダウン切り替え時）、取得済みのMemberデータから `expectedRole` と `growthTheme` をフォームに自動セットする処理を追加する。
+   - 「分析実行」ボタンを押してRecordを保存する際（またはそれに付随する処理で）、Memberの `expectedRole` と `growthTheme` も最新のフォームの入力内容で上書き更新（保存）する。
+
+4. [Prompt Update (CRITICAL)]
+   - `lib/prompts.ts` の System Prompt と User Prompt を修正し、強力な制約を追加する。
+   - 追加する制約：「【重要】あなたは提供された『文字起こしデータ』と『自己評価データ（Good/Motto）』のみに基づいて分析と出力を行わなければなりません。入力データに存在しない事実や架空の議題、一般的すぎるアドバイスを絶対に捏造（ハルシネーション）しないでください。」
+   - サマリーやポジティブな変化についても「文字起こしから具体的な発言を引用して抽出すること」という指示を明記する。
 
 # Constraints
-- 既存の「期待役割」「成長テーマ」「前回アクションの振り返り」などの機能は絶対に壊さないこと。
-- 型エラーが出ないように厳密に修正すること。
-- 余計な説明は省き、コードの修正のみを行うこと。
+- 型定義（TypeScript）を厳格に保ち、コンパイルエラーを出さないこと。
+- 既存の機能は壊さないこと。
+- 余計な説明は省き、コード生成・修正に集中すること。

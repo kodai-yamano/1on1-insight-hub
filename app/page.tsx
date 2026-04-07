@@ -5,7 +5,7 @@ import { AlertCircle, ChevronDown, Sparkles } from 'lucide-react';
 
 import { InputForm } from '@/components/InputForm';
 import { OutputDashboard } from '@/components/OutputDashboard';
-import { MemberSelector } from '@/components/MemberSelector';
+import { MemberSelector, type Member } from '@/components/MemberSelector';
 import { HistoryList } from '@/components/HistoryList';
 import type { AnalysisResult, AnalyzeRequest, FormValues } from '@/lib/types';
 
@@ -44,6 +44,16 @@ export default function Home() {
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const resultsRef = useRef<HTMLDivElement>(null);
 
+  // メンバー選択時：IDを保存し、保存済みの期待役割・成長テーマを自動入力
+  const handleMemberSelect = (member: Member | null) => {
+    setSelectedMemberId(member?.id ?? null);
+    setFormValues((prev) => ({
+      ...prev,
+      expectedRole: member?.expectedRole ?? '',
+      growthTheme: member?.growthTheme ?? '',
+    }));
+  };
+
   const handleAnalyze = async () => {
     const validationError = validate(formValues);
     if (validationError) {
@@ -78,7 +88,7 @@ export default function Home() {
       const data: AnalysisResult = await res.json();
       setResult(data);
 
-      // ── 自動保存 ──
+      // ── 自動保存 + Memberの期待役割・成長テーマを最新値で更新 ──
       if (selectedMemberId) {
         fetch('/api/records', {
           method: 'POST',
@@ -91,6 +101,15 @@ export default function Home() {
         })
           .then(() => setHistoryRefreshKey((k) => k + 1))
           .catch((err) => console.error('[auto-save]', err));
+
+        fetch(`/api/members/${selectedMemberId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            expectedRole: formValues.expectedRole,
+            growthTheme: formValues.growthTheme,
+          }),
+        }).catch((err) => console.error('[member-update]', err));
       }
 
       // Smooth-scroll to results
@@ -130,7 +149,7 @@ export default function Home() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 
         {/* Member selector */}
-        <MemberSelector selectedId={selectedMemberId} onSelect={setSelectedMemberId} />
+        <MemberSelector selectedId={selectedMemberId} onSelect={handleMemberSelect} />
 
         {/* Input form */}
         <InputForm values={formValues} onChange={setFormValues} />

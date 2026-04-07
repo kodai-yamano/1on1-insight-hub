@@ -6,12 +6,14 @@ import { User, UserPlus } from 'lucide-react';
 export interface Member {
   id: string;
   name: string;
+  expectedRole: string | null;
+  growthTheme: string | null;
   createdAt: string;
 }
 
 interface MemberSelectorProps {
   selectedId: string | null;
-  onSelect: (id: string | null) => void;
+  onSelect: (member: Member | null) => void;
 }
 
 export function MemberSelector({ selectedId, onSelect }: MemberSelectorProps) {
@@ -39,13 +41,22 @@ export function MemberSelector({ selectedId, onSelect }: MemberSelectorProps) {
       if (res.ok) {
         const member: Member = await res.json();
         setMembers((prev) => [member, ...prev]);
-        onSelect(member.id);
+        onSelect(member);
         setNewName('');
         setShowInput(false);
       }
     } finally {
       setAdding(false);
     }
+  };
+
+  const handleSelectChange = (id: string) => {
+    if (!id) {
+      onSelect(null);
+      return;
+    }
+    const member = members.find((m) => m.id === id) ?? null;
+    onSelect(member);
   };
 
   return (
@@ -62,7 +73,7 @@ export function MemberSelector({ selectedId, onSelect }: MemberSelectorProps) {
         {/* Select */}
         <select
           value={selectedId ?? ''}
-          onChange={(e) => onSelect(e.target.value || null)}
+          onChange={(e) => handleSelectChange(e.target.value)}
           className="flex-1 min-w-[180px] rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900
                      focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 bg-white"
         >

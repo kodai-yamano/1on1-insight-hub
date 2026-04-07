@@ -17,12 +17,20 @@ export async function GET() {
 // POST /api/members
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as { name?: string };
+    const body = (await request.json()) as {
+      name?: string;
+      expectedRole?: string;
+      growthTheme?: string;
+    };
     if (!body.name?.trim()) {
       return NextResponse.json({ error: '名前を入力してください。' }, { status: 400 });
     }
     const member = await prisma.member.create({
-      data: { name: body.name.trim() },
+      data: {
+        name: body.name.trim(),
+        expectedRole: body.expectedRole?.trim() || null,
+        growthTheme: body.growthTheme?.trim() || null,
+      },
     });
     return NextResponse.json(member, { status: 201 });
   } catch (error) {
