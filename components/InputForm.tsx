@@ -1,11 +1,13 @@
 'use client';
 
-import { FileText, Image as ImageIcon, MessageSquare, Star, Target, TrendingUp, User, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Check, FileText, Image as ImageIcon, MessageSquare, Save, Star, Target, TrendingUp, User, Users } from 'lucide-react';
 import type { FormValues } from '@/lib/types';
 
 interface InputFormProps {
   values: FormValues;
   onChange: (values: FormValues) => void;
+  selectedMemberId?: string | null;
 }
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
@@ -74,9 +76,31 @@ const textareaClass =
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function InputForm({ values, onChange }: InputFormProps) {
+export function InputForm({ values, onChange, selectedMemberId }: InputFormProps) {
   const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) =>
     onChange({ ...values, [key]: value });
+
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSaveSettings = async () => {
+    if (!selectedMemberId) return;
+    setSaving(true);
+    try {
+      await fetch(`/api/members/${selectedMemberId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          expectedRole: values.expectedRole,
+          growthTheme: values.growthTheme,
+        }),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -116,6 +140,32 @@ export function InputForm({ values, onChange }: InputFormProps) {
               '③ 他者を動かす力（上司・同僚・顧客を巻き込み推進できる）'
             }
           />
+        </div>
+
+        {/* Save settings button */}
+        <div className="flex items-center justify-end gap-3 pt-1">
+          {saved && (
+            <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+              <Check className="w-3.5 h-3.5" />
+              保存しました
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleSaveSettings}
+            disabled={saving || !selectedMemberId}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all
+                       disabled:opacity-40 disabled:cursor-not-allowed
+                       bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 disabled:hover:bg-blue-50"
+            title={!selectedMemberId ? 'メンバーを選択してください' : undefined}
+          >
+            {saving ? (
+              <div className="w-3.5 h-3.5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
+            このメンバーの設定を保存
+          </button>
         </div>
       </SectionCard>
 

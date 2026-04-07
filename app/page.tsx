@@ -176,7 +176,11 @@ export default function Home() {
         <MemberSelector selectedId={selectedMemberId} onSelect={handleMemberSelect} />
 
         {/* Input form */}
-        <InputForm values={formValues} onChange={setFormValues} />
+        <InputForm
+          values={formValues}
+          onChange={setFormValues}
+          selectedMemberId={selectedMemberId}
+        />
 
         {/* Inline validation / API error */}
         {error && (

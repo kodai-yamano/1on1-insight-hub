@@ -1,24 +1,23 @@
 # Objective
-NextAuth.js を導入し、`@cuebic.co.jp` のGoogleアカウントを持つユーザーのみがアプリにアクセスできるようにアクセス制限（Middleware）をかける。
+1. AIが入力内容（文字起こし等）を無視する問題（ハルシネーション）を完全に解決する。
+2. メンバーの「期待役割」「成長テーマ」を明示的にDBに保存・呼び出しできる機能（保存ボタン）を実装する。
 
 # Execution Steps (Cursor Composer)
 以下のステップで既存のコードを修正してください。
 
-1. [Setup]
-   - ターミナルで `npm install next-auth` を実行する。
+1. [Fix AI Hallucination]
+   - `lib/prompts.ts` を修正し、`transcript`（文字起こし）, `good`, `motto`, `expectedRole`, `growthTheme` の値が**確実にAIへのプロンプト文字列内に埋め込まれる**ようにする。
+   - プロンプト内に以下を追記する：「【絶対厳守】提供された『文字起こし』と『自己評価』のデータのみを使用して出力を作成してください。入力にない話題、架空の決定事項、一般的すぎるアドバイスを絶対に捏造（ハルシネーション）しないでください。文字起こしが不足している場合は推測せず『情報なし』としてください。」
 
-2. [NextAuth Configuration]
-   - `app/api/auth/[...nextauth]/route.ts` を作成し、GoogleProviderを設定する。
-   - `callbacks: { signIn }` を使用し、`profile.email.endsWith('@cuebic.co.jp')` の場合のみログインを許可するロジックを実装する。弾かれた場合はデフォルトのエラーページで構わない。
+2. [Member Data Persistence - API]
+   - `app/api/members/[id]/route.ts` (無ければ作成) に `PUT` または `PATCH` メソッドを実装し、指定したメンバーの `expectedRole` と `growthTheme` を更新できるようにする。
 
-3. [Middleware (Route Protection)]
-   - プロジェクトのルート（`app/` と同じ階層）に `middleware.ts` を作成する。
-   - `withAuth` を使用し、未ログインユーザーがアクセスしてきた場合は自動的にGoogleログイン画面（NextAuthのデフォルトログイン画面）にリダイレクトさせる。すべてのルート（`/` 以下のすべて）を保護対象とする。
-
-4. [UI Update - 任意]
-   - アプリケーション全体でセッション情報を取得できるよう、`app/layout.tsx` または別のClient Componentにて `SessionProvider` をラップする設定を行う（App Routerの仕様に従うこと）。
-   - ヘッダー部分などに、現在ログインしているユーザーのアイコンやメールアドレス、および「ログアウト」ボタンを表示する。
+3. [Member Data Persistence - UI]
+   - `components/InputForm.tsx` の上司入力エリア（期待役割・成長テーマの下など）に、「このメンバーの設定を保存」という専用ボタンを追加する。
+   - このボタンを押すと、上記APIを叩いてDBを更新し、完了後に「保存しました」とUI上でわかるようにする（簡易的なトーストやテキスト表示など）。
+   - メンバー選択（セレクトボックス）を切り替えた際、取得済みのMemberデータから `expectedRole` と `growthTheme` がフォームに確実に自動セットされるように `useEffect` 等の処理を見直す。
 
 # Constraints
-- 型定義（TypeScript）を厳格に保ち、コンパイルエラーを出さないこと。
-- 余計な説明は省き、コード生成・修正に集中すること。
+- 型定義（TypeScript）を厳格に保つこと。
+- 導入済みのNextAuthの認証機構や、既存のデザインは絶対に壊さないこと。
+- 余計な説明は省き、コードの生成と修正に集中すること。
