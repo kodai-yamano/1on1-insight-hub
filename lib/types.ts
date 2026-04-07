@@ -31,6 +31,10 @@ export interface NextAction {
 }
 
 export interface ViewAData {
+  summary: {
+    topics: string[];
+    decisions: string[];
+  };
   positiveChanges: string[];
   nextActions: NextAction[];
 }

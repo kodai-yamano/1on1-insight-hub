@@ -2,6 +2,17 @@ import type { AnalysisResult } from './types';
 
 export const MOCK_ANALYSIS_RESULT: AnalysisResult = {
   viewA: {
+    summary: {
+      topics: [
+        '先週の商談結果と顧客Aとの打ち合わせの振り返り',
+        'Salesforceレポートを使ったデータ活用の取り組み',
+        '今週のフォローアップ電話の優先順位と進め方',
+      ],
+      decisions: [
+        '月曜日のABCプロジェクト提案に向けて仮説シートを金曜日までに作成する',
+        '田中さんへのインタビューを今週中に30分設定する',
+      ],
+    },
     positiveChanges: [
       '顧客との打ち合わせで自ら質問を準備して臨む姿勢が見られました。「提案前に顧客の課題を3つ言語化する」という取り組みが実際に実践でき、顧客からの信頼も高まり始めています。',
       'Mottoに挙げたデータ活用の点で、先週はSalesforceのレポートを自ら作成して数値で状況を把握しようとする具体的な行動変容が起きています。',

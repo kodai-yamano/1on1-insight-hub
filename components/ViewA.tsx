@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Check, CheckCircle2, Copy } from 'lucide-react';
+import { ArrowRight, Check, CheckCircle2, ClipboardList, Copy } from 'lucide-react';
 import type { ViewAData } from '@/lib/types';
 import { generateCopyText } from '@/lib/utils';
 
@@ -60,6 +60,42 @@ export function ViewA({ data }: ViewAProps) {
             </>
           )}
         </button>
+      </div>
+
+      {/* Summary */}
+      <div className="bg-slate-50 rounded-xl border border-slate-200 p-5">
+        <h4 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+          <ClipboardList className="w-4 h-4 text-slate-500" />
+          1on1 サマリー
+        </h4>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">主な議題</p>
+            <ul className="space-y-1.5">
+              {data.summary.topics.map((topic, i) => (
+                <li key={i} className="flex gap-2 text-sm text-slate-700">
+                  <span className="text-slate-400 flex-shrink-0">・</span>
+                  {topic}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">決定事項</p>
+            {data.summary.decisions.length > 0 ? (
+              <ul className="space-y-1.5">
+                {data.summary.decisions.map((decision, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-slate-700">
+                    <span className="text-slate-400 flex-shrink-0">・</span>
+                    {decision}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-slate-400">なし</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Positive changes */}

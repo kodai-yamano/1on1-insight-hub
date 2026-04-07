@@ -23,6 +23,14 @@ export function generateCopyText(viewA: ViewAData): string {
 
   lines.push(`=== 1on1 フィードバック (${today}) ===`);
   lines.push('');
+  lines.push('【1on1 サマリー】');
+  lines.push('＜主な議題＞');
+  viewA.summary.topics.forEach((t) => lines.push(`  ・${t}`));
+  if (viewA.summary.decisions.length > 0) {
+    lines.push('＜決定事項＞');
+    viewA.summary.decisions.forEach((d) => lines.push(`  ・${d}`));
+  }
+  lines.push('');
   lines.push('【今週のポジティブな変化】');
   viewA.positiveChanges.forEach((change, i) => {
     lines.push(`${i + 1}. ${change}`);

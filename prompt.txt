@@ -1,1 +1,21 @@
-Vercel
+# Objective
+現在の1on1分析アプリに、「1on1のサマリー（議題と決定事項）」を自動生成して表示する機能を追加する。
+
+# Execution Steps (Cursor Composer)
+以下のステップで既存のコードを修正してください。
+
+1. [Type Update]
+   - `lib/types.ts` 内の `ViewAData` インターフェースに、以下のプロパティを追加する。
+     `summary: { topics: string[]; decisions: string[] };`
+
+2. [Prompt Update]
+   - `lib/prompts.ts` のシステムプロンプト（JSON出力の指示部分）を修正し、入力された「1on1の文字起こしデータ」を元に、ViewAの `summary` として「主な議題（topics）」と「決定事項（decisions）」をそれぞれ箇条書きで抽出・生成するように指示を追加する。
+
+3. [UI Update]
+   - `components/ViewA.tsx` を修正し、生成されたサマリー（議題と決定事項）を、画面の一番上（「今週のポジティブな変化」の上）にわかりやすく表示する。
+   - コピー機能（generateCopyText等）にもサマリーの内容が含まれるように文字列の生成ロジックを修正する。
+
+# Constraints
+- 既存の「期待役割」「成長テーマ」「前回アクションの振り返り」などの機能は絶対に壊さないこと。
+- 型エラーが出ないように厳密に修正すること。
+- 余計な説明は省き、コードの修正のみを行うこと。
